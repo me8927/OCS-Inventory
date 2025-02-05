@@ -881,7 +881,10 @@ def run_top_to_bottom():
                 if len(number_str) > 10:
                     st.error("Number exceeds 10 digits")
                 number_str = number_str.zfill(10)  # Pads with leading zeros if needed
-                node_id = f"{node_type.upper()[:3]}-{random_id}"
+                prefix = node_type.upper()[:3]
+                if prefix == "CAR":
+                    prefix = "CRT"
+                node_id = f"{prefix}-{number_str}"
                 # Ensure ID is unique by checking against existing DataFrame
                 #if not any(st.session_state.data['id'] == node_id):
                 return node_id
