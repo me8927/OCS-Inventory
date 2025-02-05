@@ -9,6 +9,7 @@ import barcode_generator
 
 def run_top_to_bottom():
     #session states
+    pass
     if "search_query" not in st.session_state:
         st.session_state.search_query = ""
 
