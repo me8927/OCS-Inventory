@@ -9,7 +9,6 @@ import barcode_generator
 
 def run_top_to_bottom():
     #session states
-    pass
     if "search_query" not in st.session_state:
         st.session_state.search_query = ""
 
@@ -60,12 +59,12 @@ def run_top_to_bottom():
             "machine": [], #1
             "shelf": [], #1
             "cart": [], #1
-            "tray": ["cart", "shelf", "machine"], #2
-            "storage box": ["shelf"], #idk
-            "box": ["tray"], #3
-            "separator":["box", "storage box"], #4
+            "plate": ["cart", "shelf", "machine"], #2
+            "quad": ["shelf"], #idk
+            "bin": ["plate"], #3
+            "separator":["bin", "quad"], #4
             "location": [],
-            "card": ["box", "separator"]
+            "card": ["bin", "separator"]
         }
 
     if "previous_type" not in st.session_state:
@@ -92,43 +91,43 @@ def run_top_to_bottom():
     # Function to fetch data from Google Sheets (do not cache the 'service' argument)
     def fetch_sheet_data(_service, spreadsheet_id, sheet_name):
         """Fetches data from the Google Sheet and returns it as a Pandas DataFrame."""
-        sheet = _service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=spreadsheet_id, range=sheet_name).execute()
-        values = result.get("values", [])
+        # sheet = _service.spreadsheets()
+        # result = sheet.values().get(spreadsheetId=spreadsheet_id, range=sheet_name).execute()
+        # values = result.get("values", [])
         
-        if values:
-            columns = []
-            for value in values[0]:
-                columns.append(str(value).lower())
-            df = pd.DataFrame(values[1:], columns=columns)  # First row as column names
-        else:
-            df = pd.DataFrame()  # Empty DataFrame if no data
+        # if values:
+        #     columns = []
+        #     for value in values[0]:
+        #         columns.append(str(value).lower())
+        #     df = pd.DataFrame(values[1:], columns=columns)  # First row as column names
+        # else:
+        df = pd.DataFrame()  # Empty DataFrame if no data
         return df
 
     def update_rows(_service, spreadsheet_id, sheet_name, rows_dict):
-        # Prepare the batch update data
-        data = []
-        for index, row in rows_dict.items():
-            # Convert the row to a list
-            updated_row = row.tolist()
-            # Calculate the range for this row (1-based indexing in Sheets, +2 for header)
-            range_to_update = f"{sheet_name}!A{index + 2}"
-            # Append this update to the batch data
-            data.append({
-                "range": range_to_update,
-                "values": [updated_row]
-            })
+        # # Prepare the batch update data
+        # data = []
+        # for index, row in rows_dict.items():
+        #     # Convert the row to a list
+        #     updated_row = row.tolist()
+        #     # Calculate the range for this row (1-based indexing in Sheets, +2 for header)
+        #     range_to_update = f"{sheet_name}!A{index + 2}"
+        #     # Append this update to the batch data
+        #     data.append({
+        #         "range": range_to_update,
+        #         "values": [updated_row]
+        #     })
 
-        # Perform batch update to Google Sheets
-        if data:
-            body = {
-                "valueInputOption": "RAW",
-                "data": data
-            }
-            _service.spreadsheets().values().batchUpdate(
-                spreadsheetId=spreadsheet_id,
-                body=body
-            ).execute()
+        # # Perform batch update to Google Sheets
+        # if data:
+        #     body = {
+        #         "valueInputOption": "RAW",
+        #         "data": data
+        #     }
+        #     _service.spreadsheets().values().batchUpdate(
+        #         spreadsheetId=spreadsheet_id,
+        #         body=body
+        #     ).execute()
         st.session_state.changes = {}
 
 
@@ -392,7 +391,7 @@ def run_top_to_bottom():
                 if location_idx is None:
                     location_idx, location_id, location_type = get_location_from_object(box_idx)
 
-                if df.loc[box_idx, "type"] == "storage box":
+                if df.loc[box_idx, "type"] == "quad":
                     if location_idx is None:
                         st.error(f"Did not complete action. No locations associated with {df.loc[box_idx, 'id']}")
                         return
@@ -430,7 +429,7 @@ def run_top_to_bottom():
                     st.session_state.changes[box_idx] = df.iloc[box_idx].copy()
                     st.success(f"Placed {df.loc[sep_idx, 'id']} in {df.loc[box_idx, 'id']}.") 
 
-                elif df.loc[box_idx, "type"] == "box":
+                elif df.loc[box_idx, "type"] == "bin":
                     if len(sep_idx) > 1:
                         st.warning(f"Completed action but only with the last scanned item.") 
                     sep_idx = sep_idx[-1]
@@ -732,7 +731,7 @@ def run_top_to_bottom():
         st.subheader("Filter and Search")
 
         # Category filter
-        categories_list = ("shelf", "machine", "cart", "tray", "box", "storage box", "separator", "location")
+        categories_list = ("shelf", "machine", "cart", "plate", "bin", "quad", "separator", "location")
 
         c1, c2, c3, c4 = st.columns([5, 5, 1.5, 1.5])
         with c1:
@@ -876,14 +875,15 @@ def run_top_to_bottom():
             st.subheader("Inputting New Item:")
             st.info("Please input data with the data editor, then click cancel or save. It will add a new row to the spreadsheet.")
 
-            def get_new_id(node_type):
+            def get_new_id(node_type, number_str):
                 """Generate a unique ID based on the type."""
-                while True:
-                    random_id = ''.join(random.choices(string.ascii_uppercase, k=6))
-                    node_id = f"{node_type.upper()[:3]}-{random_id}"
-                    # Ensure ID is unique by checking against existing DataFrame
-                    if not any(st.session_state.data['id'] == node_id):
-                        return node_id
+                if len(number_str) > 10:
+                    st.error("Number exceeds 10 digits")
+                number_str = number_str.zfill(10)  # Pads with leading zeros if needed
+                node_id = f"{node_type.upper()[:3]}-{random_id}"
+                # Ensure ID is unique by checking against existing DataFrame
+                #if not any(st.session_state.data['id'] == node_id):
+                return node_id
                     
             def get_new_card_id():
                 """Generate a unique ID based on the type."""
@@ -901,10 +901,11 @@ def run_top_to_bottom():
                 return outputs
 
                     
-            def save_new_items(node_type, quantity, name, lsq):
+            def save_new_items(node_type, quantity, name, lsq, starting_index):
                 """Save new items to the session DataFrame and update the barcode list."""
                 for _ in range(quantity):
-                    node_id = get_new_id(node_type)
+                    starting_index += 1
+                    node_id = get_new_id(node_type, str(starting_index))
                     barcode = f"*{node_id}*"
                     ls_ids = None
                     if not lsq == 0:
@@ -972,13 +973,14 @@ def run_top_to_bottom():
 
             with st.form("add_items_form"):
                 st.subheader("Add New Containers")
-                node_type = st.selectbox("Select Type", ["shelf", "cart", "machine", "tray", "box", "storage box", "separator"])
+                node_type = st.selectbox("Select Type", ["shelf", "cart", "machine", "plate", "bin", "quad", "separator"])
                 quantity = st.number_input("Quantity", min_value=1, max_value=500, step=1)
                 name = st.text_input("Name (optional)")
                 location_specific_quantity = st.number_input("How many location-specific tags?", min_value=0, max_value=500, step=1)
+                starting_index = st.number_input("What ID number is the first tag? (VERIFY IN ODOO THAT IT IS UNIQUE)", min_value=0, max_value=1000000000, step=1)
                 submitted = st.form_submit_button("Submit")
                 if submitted:
-                    save_new_items(node_type, quantity, name, location_specific_quantity)  # Save new items to the session state and dataframe
+                    save_new_items(node_type, quantity, name, location_specific_quantity, starting_index)  # Save new items to the session state and dataframe
                     st.success(f"{quantity} {node_type}(s) added successfully!")
 
             with st.form("add_card_form"):
