@@ -101,7 +101,8 @@ def run_top_to_bottom():
         #         columns.append(str(value).lower())
         #     df = pd.DataFrame(values[1:], columns=columns)  # First row as column names
         # else:
-        df = pd.DataFrame()  # Empty DataFrame if no data
+        columns = ['id', 'name', 'type', 'parent', 'child', 'barcode', 'location']
+        df = pd.DataFrame(columns = columns)  # Empty DataFrame if no data
         return df
 
     def update_rows(_service, spreadsheet_id, sheet_name, rows_dict):
