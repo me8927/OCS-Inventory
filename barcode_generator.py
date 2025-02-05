@@ -239,4 +239,5 @@ def download_qr_code_pdf(items, paper="sheet", label="1x1"):
             html2 = create_download_link(pdf2.output(dest="S").encode("latin-1"), name2)
     html = create_download_link(pdf.output(dest="S").encode("latin-1"), name)
     st.markdown(html, unsafe_allow_html=True)
-    st.markdown(html2, unsafe_allow_html=True)
+    if pdf2 is not None:
+        st.markdown(html2, unsafe_allow_html=True)
