@@ -979,7 +979,8 @@ def run_top_to_bottom():
                 st.subheader("Add New Containers")
                 node_type = st.selectbox("Select Type", ["shelf", "cart", "machine", "plate", "bin", "quad", "separator"])
                 quantity = st.number_input("Quantity", min_value=1, max_value=500, step=1)
-                name = st.text_input("Name (optional)")
+                #name = st.text_input("Name (optional)")
+                name = ""
                 location_specific_quantity = st.number_input("How many location-specific tags?", min_value=0, max_value=500, step=1)
                 starting_index = st.number_input("What ID number is the first tag? (VERIFY IN ODOO THAT IT IS UNIQUE)", min_value=0, max_value=1000000000, step=1)
                 submitted = st.form_submit_button("Submit")
