@@ -30,30 +30,32 @@ def generate_qr_code(data, label_w, label_h, format = "square"):
 
     if format == "square":
         # Resize QR code to 0.7" x 0.7" at high DPI (e.g., 300 DPI)
-        qr_w = 0.8*min(label_w, label_h)
-        qr_h = 0.8*min(label_w, label_h)
+        qr_w = 0.8 * min(label_w, label_h)
+        qr_h = 0.8 * min(label_w, label_h)
         img = img.resize((int(qr_w * dpi), int(qr_h * dpi)), Image.LANCZOS)
 
         img_with_number = Image.new('RGB', (int(label_w * dpi), int(label_h * dpi)), 'white')
-        img_with_number.paste(img, (int((label_w * dpi - img.width) / 2), 0))
 
-        # Draw text below the QR code
+        # Draw text at the top
         draw = ImageDraw.Draw(img_with_number)
-        font = ImageFont.truetype("DejaVuSans.ttf", int(14*(label_h/2) * dpi / 72))  # Scale font size based on DPI
+        font = ImageFont.truetype("DejaVuSans.ttf", int(13 * (label_h / 2) * dpi / 72))  # Scale font size based on DPI
         text = data
 
-        # Use textbbox (new method) instead of textsize (deprecated) to get the bounding box of the text
+        # Get bounding box of the text
         text_bbox = draw.textbbox((0, 0), text, font=font)
         text_width = text_bbox[2] - text_bbox[0]
         text_height = text_bbox[3] - text_bbox[1]
 
-        # Draw the text in the center below the QR code
+        # Draw the text in the center at the top
         draw.text(
-            ((img_with_number.width - text_width) / 2, img.height + 2),
+            ((img_with_number.width - text_width) / 2, 2),
             text,
             fill='black',
             font=font
         )
+
+        # Paste the image below the text
+        img_with_number.paste(img, (int((label_w * dpi - img.width) / 2), text_height + 4))
     elif format == "separator top":
         img = img.resize((int(0.4 * dpi), int(0.4 * dpi)), Image.LANCZOS)
 
