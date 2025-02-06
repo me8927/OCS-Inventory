@@ -30,8 +30,8 @@ def generate_qr_code(data, label_w, label_h, format = "square"):
 
     if format == "square":
         # Resize QR code to 0.7" x 0.7" at high DPI (e.g., 300 DPI)
-        qr_w = 0.8 * min(label_w, label_h)
-        qr_h = 0.8 * min(label_w, label_h)
+        qr_w = 0.9 * min(label_w, label_h)
+        qr_h = 0.9 * min(label_w, label_h)
         img = img.resize((int(qr_w * dpi), int(qr_h * dpi)), Image.LANCZOS)
 
         img_with_number = Image.new('RGB', (int(label_w * dpi), int(label_h * dpi)), 'white')
