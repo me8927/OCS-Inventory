@@ -732,7 +732,7 @@ def run_top_to_bottom():
         st.subheader("Filter and Search")
 
         # Category filter
-        categories_list = ("shelf", "machine", "cart", "plate", "bin", "quad", "separator", "location")
+        categories_list = ("shelf", "machine", "cart", "plate", "bin", "quad", "separator", "location", "feedtray")
 
         c1, c2, c3, c4 = st.columns([5, 5, 1.5, 1.5])
         with c1:
@@ -884,6 +884,8 @@ def run_top_to_bottom():
                 prefix = node_type.upper()[:3]
                 if prefix == "CAR":
                     prefix = "CRT"
+                if prefix == "FEE":
+                    prefix = "FDT"
                 node_id = f"{prefix}-{number_str}"
                 # Ensure ID is unique by checking against existing DataFrame
                 #if not any(st.session_state.data['id'] == node_id):
@@ -977,7 +979,7 @@ def run_top_to_bottom():
 
             with st.form("add_items_form"):
                 st.subheader("Add New Containers")
-                node_type = st.selectbox("Select Type", ["shelf", "cart", "machine", "plate", "bin", "quad", "separator"])
+                node_type = st.selectbox("Select Type", ["shelf", "cart", "machine", "plate", "bin", "quad", "separator", "feedtray"])
                 quantity = st.number_input("Quantity", min_value=1, max_value=500, step=1)
                 #name = st.text_input("Name (optional)")
                 name = ""
